@@ -32,14 +32,16 @@ app.post('/api/extract-text', upload.single('image'), async (req, res) => {
     const ocrResponse = await axios.post('https://api.ocr.space/parse/image', formData, {
       headers: formData.getHeaders(),
     });
-
+    console.log("Never happened");
+    
     const parsedResults = ocrResponse.data?.ParsedResults;
     const extractedText = parsedResults && parsedResults[0]?.ParsedText 
       ? parsedResults[0].ParsedText 
       : 'No text found';
 
     // Add a personalized prompt to the extracted text
-    const personalizedPrompt = `This is a question extracted from an image. Please provide an answer by choosing one of the following options based on the text below in bold, also add a simple explanation along with the question statement that you understood. Make sure any headings are bold.:\n\n"${extractedText}"`;
+    const personalizedPrompt = `This is a question extracted from an image. The spellings may be wrong, so read accordingly. If there are options in the question, please provide an answer by choosing one of the following options based on the text below in bold. Also, add a simple explanation along with the question statement that you understood. Make sure any headings are bold. If there are no options, then answer accordingly. Whatever you answer, write it in bold at the end always:\n\n"${extractedText}"`;
+
 
     // Groq API request to get AI response based on the personalized prompt
     const chatCompletion = await groq.chat.completions.create({
@@ -53,7 +55,6 @@ app.post('/api/extract-text', upload.single('image'), async (req, res) => {
     });
 
     const gptAnswer = chatCompletion.choices[0]?.message?.content || 'No response from AI';
-
     res.json({ text: extractedText, answer: gptAnswer });
   } catch (error) {
     console.error('Error processing request:', error);
