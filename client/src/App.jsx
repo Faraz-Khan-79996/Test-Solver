@@ -42,7 +42,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-5">
       <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">AI Image Analyzer</h1>
+        <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Image to Text & AI Answer</h1>
         <form onSubmit={handleSubmit} className="space-y-5">
           <label className="block text-sm font-medium text-gray-700">
             Upload Image
