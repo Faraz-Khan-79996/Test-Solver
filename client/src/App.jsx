@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 
@@ -8,6 +8,31 @@ function App() {
   const [aiResponse, setAiResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null); // Reference to the file input element
+
+  useEffect(() => {
+    const handlePaste = (event) => {
+      const items = event.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const file = items[i].getAsFile();
+          setSelectedFile(file);
+          
+          // Update the input field with the pasted file
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          fileInputRef.current.files = dataTransfer.files;
+
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+    };
+  }, []);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -15,6 +40,11 @@ function App() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!selectedFile) {
+      setError('No file selected. Please upload an image.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     setExtractedText('');
@@ -42,15 +72,16 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-5">
       <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">Image to Text & AI Answer</h1>
+        <h1 className="text-3xl font-bold text-gray-800 text-center mb-6">AI Image Analyzer</h1>
         <form onSubmit={handleSubmit} className="space-y-5">
           <label className="block text-sm font-medium text-gray-700">
-            Upload Image
+            Upload Image (or Paste)
           </label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
+            ref={fileInputRef} // Ref to access the input element
             className="block w-full text-sm text-gray-900 border border-gray-300 cursor-pointer bg-gray-50 focus:outline-none"
             style={{ borderRadius: '0' }} // Removed rounded corners
           />
