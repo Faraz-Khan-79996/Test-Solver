@@ -20,6 +20,8 @@ app.use(express.static(path.join(__dirname, 'dist')))
 
 app.post('/api/extract-text', upload.single('image'), async (req, res) => {
   const imagePath = req.file.path;
+  console.log(imagePath);
+  
 
   try {
     // OCR API request to extract text from the image
@@ -32,7 +34,6 @@ app.post('/api/extract-text', upload.single('image'), async (req, res) => {
     const ocrResponse = await axios.post('https://api.ocr.space/parse/image', formData, {
       headers: formData.getHeaders(),
     });
-    console.log("Never happened");
     
     const parsedResults = ocrResponse.data?.ParsedResults;
     const extractedText = parsedResults && parsedResults[0]?.ParsedText 
@@ -61,7 +62,7 @@ app.post('/api/extract-text', upload.single('image'), async (req, res) => {
     res.status(500).json({ error: 'Failed to process request' });
   } finally {
     // Clean up the uploaded file
-    fs.unlink(imagePath, (err) => {
+    fs.unlink(path.join(__dirname , imagePath), (err) => {
       if (err) {
         console.error('Error deleting file:', err);
       }
